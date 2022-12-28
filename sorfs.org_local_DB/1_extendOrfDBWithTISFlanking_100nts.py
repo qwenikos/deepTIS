@@ -147,27 +147,36 @@ command="bedtools slop  -s -g "+chromSizes+" -i "+sOrfsSelectedFieldsBedFileName
 print (command)
 os.system(command)
 
-#############################################
 
 command="bedtools getfasta -name -tab -s -fi "+genomeFileName+" -bed "+sOrfsWithExtendedFlankBedFileName+" -fo "+sOrfsWithExtendedFlankTabFileName;
 print (command)
 os.system(command)
 
-#############################################
 
-command="bedtools getfasta -name  -s -fi "+genomeFileName+" -bed "+sOrfsWithExtendedFlankBedFileName+" -fo "+sOrfsWithExtendedFlankFaFileName;
+command="bedtools getfasta -name  -s -fi "+genomeFileName+" -bed "+sOrfsWithExtendedFlankBedFileName+" -fo "+sOrfsWithExtendedFlankFaFileName
 print (command)
 os.system(command)
 
 #############################################
+command="bedtools slop  -s -g "+chromSizes+" -i "+sOrfs_sORF_BedFileName+"  -l "+str(flankingInterval)+" -r 0 > "+"tempFile.bed"
+print (command)
+os.system(command)
 
-command="bedtools getfasta -name  -s -fi "+genomeFileName+" -bed "+sOrfs_sORF_BedFileName+" -fo "+sOrfs_sORF_FaFileName;
+
+command="bedtools getfasta -name  -s -fi "+genomeFileName+" -bed "+"tempFile.bed"+" -fo "+sOrfs_sORF_FaFileName
 print (command)
 os.system(command)
 
 #############################################
+command="bedtools slop  -s -g "+chromSizes+" -i "+sOrfs_intronic_BedFileName+"  -l "+str(flankingInterval)+" -r 0 > "+"tempFile.bed"
+print (command)
+os.system(command)
 
-command="bedtools getfasta -name  -s -fi "+genomeFileName+" -bed "+sOrfs_intronic_BedFileName+" -fo "+sOrfs_intronic_FaFileName;
+command="bedtools getfasta -name  -s -fi "+genomeFileName+" -bed "+"tempFile.bed"+" -fo "+sOrfs_intronic_FaFileName
+print (command)
+os.system(command)
+
+command="rm -rf tempFile.bed"
 print (command)
 os.system(command)
 

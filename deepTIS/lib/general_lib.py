@@ -43,6 +43,18 @@ def oneHotEncoder1D(seqIn):
     # print (seqIn)
     seqToOneHotDict={"A":[1.0, 0.0, 0.0, 0.0],"C":[0.0, 1.0, 0.0, 0.0],"T":[0.0, 0.0, 1.0, 0.0],"G":[0.0, 0.0, 0.0, 1.0]}
     for aBase in seqIn:
+        encSeq+=seqToOneHotDict[aBase]
+    encSeq=np.array(encSeq)
+    return encSeq
+
+
+def oneHotEncoder1D(seqIn):
+    import numpy as np
+    encSeq=[]
+    seqIn=seqIn.upper()
+    # print (seqIn)
+    seqToOneHotDict={"A":[1.0, 0.0, 0.0, 0.0],"C":[0.0, 1.0, 0.0, 0.0],"T":[0.0, 0.0, 1.0, 0.0],"G":[0.0, 0.0, 0.0, 1.0]}
+    for aBase in seqIn:
         encSeq+=seqToOneHotDict[aBase]  
     encSeq=np.array(encSeq)
     return encSeq   

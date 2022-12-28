@@ -32,13 +32,18 @@ else:
 positiveSetFileName=workingDrir+"DeepTISFramework/trainingData/TIS/positive/sequences/tisSeq_valid.fa"
 negativeSetFileName=workingDrir+"DeepTISFramework/trainingData/TIS/negative/sequences/tisSeq_valid.fa"
 
-ensembleTestDatasetFileName=workingDrir+"DeepTISFramework/testData/sorf.org/allSorfsWithTIS_0_100_ENSEMBLE_only.fa"
-intronicTestDatasetFileName=workingDrir+"DeepTISFramework/testData/sorf.org/allSorfsWithTIS_0_100_intronic_only.fa"
+ensembleTestDatasetFileName=workingDrir+"DeepTISFramework/sorfs.org_local_DB/orfDBWithTISFlanking_100nts/sOrfs_sORF.fa"
+intronicTestDatasetFileName=workingDrir+"DeepTISFramework/sorfs.org_local_DB/orfDBWithTISFlanking_100nts/sOrfs_intronic.fa"
+
+
 pos_sim_10k=workingDrir+"DeepTISFramework/testData/simmulated_data/positive_simSorfs_Flank-100_10000.fa"
 neg_sim_10k=workingDrir+"DeepTISFramework/testData/simmulated_data/negative_simSorfs_Flank-100_10000.fa"
 
+epochsNum=10
 upSeqSize=7
-downSeqSize=12 ##not count ATG
+downSeqSize=2 ##not count ATG
+
+
 seqSizeWithStartCodon=upSeqSize+3+downSeqSize
 seqSize=upSeqSize+downSeqSize
 
@@ -64,10 +69,10 @@ def readTrainingData():
         trainSeq+=aLine[ATGPos+3:ATGPos+3+downSeqSize]            #part after ATG
         
         if len(trainSeq)<seqSize:
-            print("Warning:length Problem in",trainSeq)
+            #print("Warning:length Problem in",trainSeq)
             continue
         if (dnaCheck(trainSeq)==False):
-            print("Warning:Nucleotide Problem in",trainSeq)
+            #print("Warning:Nucleotide Problem in",trainSeq)
             continue
         x+=[trainSeq]    
         y+=[1]  #1 for positive
@@ -84,10 +89,10 @@ def readTrainingData():
         trainSeq+=aLine[ATGPos+3:ATGPos+3+downSeqSize]            #part after ATG
         
         if len(trainSeq)<seqSize:
-            print("Warning:length Problem in",trainSeq)
+            # print("Warning:length Problem in",trainSeq)
             continue
         if (dnaCheck(trainSeq)==False):
-            print("Warning:Nucleotide Problem in",trainSeq)
+            # print("Warning:Nucleotide Problem in",trainSeq)
             continue
         x+=[trainSeq]
         y+=[0] #0 for negative
@@ -112,10 +117,10 @@ def readTestData(testDataFileName,ATGPos):
         trainSeq=aLine[ATGPos-upSeqSize:ATGPos]                   #part befote ATG
         trainSeq+=aLine[ATGPos+3:ATGPos+3+downSeqSize]            #part after ATG
         if len(trainSeq)<seqSize:
-            print("Warning:length Problem in",trainSeq)
+            # print("Warning:length Problem in",trainSeq)
             continue
         if (dnaCheck(trainSeq)==False):
-            print("Warning:Nucleotide Problem in",trainSeq)
+            # print("Warning:Nucleotide Problem in",trainSeq)
             continue
         x+=[trainSeq]
         y+=[0]  #0 for positive
@@ -134,10 +139,15 @@ def createNetInput(x,y):
         # print(aSeq,y)
         # encodedSeq=oneHotEncoder1D(aSeq)
         # print (aSeq)
-        encodedSeq=oneHotEncoder(aSeq)
+
+        # encodedSeq=oneHotEncoder(aSeq)
+        encodedSeq=oneHotEncoder1D(aSeq)
+        print (aSeq)
+
         netX+=[encodedSeq]
         netY+=[y]
     return np.array(netX),np.array(netY)
+
 
 def splitTrainTestData(x,y):
     printFuncName(commentFlag)
@@ -168,7 +178,7 @@ def trainingFunc(xTrain,yTrain):
         model.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['accuracy'])
         model.summary()
         # model.fit(xTrain,yTrain, epochs=5, steps_per_epoch=100)
-        model.fit(xTrain,yTrain, epochs=5, )
+        model.fit(xTrain,yTrain, epochs=epochsNum, )
 
     if modelNo==2:
         model.add(Input(shape=inputShape))  ##input shape
@@ -184,7 +194,7 @@ def trainingFunc(xTrain,yTrain):
         # model.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['accuracy'])
         model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy','mse']) ## loss='categorical_crossentropy' in case of multiclass
         model.summary()
-        model.fit(xTrain,yTrain,epochs=150,verbose=1)
+        model.fit(xTrain,yTrain,epochs=epochsNum,verbose=1)
 
     if modelNo==3: #https://www.nature.com/articles/s41598-021-89850-9
         model.add(Input(shape=inputShape))  ##input shape
@@ -196,7 +206,7 @@ def trainingFunc(xTrain,yTrain):
         print(model.summary())
         model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy','mse']) ## loss='categorical_crossentropy' in case of multiclass
         model.summary()
-        model.fit(xTrain,yTrain,epochs=50,verbose=1)
+        model.fit(xTrain,yTrain,epochs=epochsNum,verbose=1)
 
     if modelNo==4: #nikos1
         model.add(Input(shape=inputShape))  ##input shape
@@ -209,7 +219,7 @@ def trainingFunc(xTrain,yTrain):
         print(model.summary())
         model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy','mse']) ## loss='categorical_crossentropy' in case of multiclass
         model.summary()
-        model.fit(xTrain,yTrain,epochs=3,verbose=2)
+        model.fit(xTrain,yTrain,epochs=epochsNum,verbose=2)
  
     if modelNo==5: #nikos1 clear fully connected
         model.add(Input(shape=inputShape))  ##input shape
@@ -225,7 +235,7 @@ def trainingFunc(xTrain,yTrain):
         print(model.summary())
         model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy','mse']) ## loss='categorical_crossentropy' in case of multiclass
         model.summary()
-        model.fit(xTrain,yTrain,epochs=30,validation_split=0.33,verbose=2)
+        model.fit(xTrain,yTrain,epochs=epochsNum,validation_split=0.33,verbose=2)
     model.save(modelName)   
 
 def predictFunc(xTest):
@@ -233,7 +243,7 @@ def predictFunc(xTest):
     from keras.models import load_model
     model=load_model(modelName)
 
-    predictions=model.predict(xTest)
+    predictions=model.predict(xTest,verbose=0)
     predictedClasses=np.copy(predictions)
     predictedClasses[predictedClasses>=0.5]=1
     predictedClasses[predictedClasses<0.5]=0
@@ -283,17 +293,19 @@ def main():
         # predictReport(predictedClasses,yTest)
     
     if (testing):
+        report=""
         printn("start Testing")
         printh("ensembleTestDatasetFileName")
-        xTest,yTest=readTestData(ensembleTestDatasetFileName,8)
+        xTest,yTest=readTestData(ensembleTestDatasetFileName,100)
         xNet,yNet=createNetInput(xTest,yTest)
         predictions,predictedClasses=predictFunc(xNet)
         # print (predictedClasses)
+      
         print("negs=",(predictedClasses == 0.).sum())
         print("pos=",(predictedClasses == 1.).sum())
 
         printh("intronicTestDatasetFileName")
-        xTest,yTest=readTestData(intronicTestDatasetFileName,8)
+        xTest,yTest=readTestData(intronicTestDatasetFileName,100)
 
         xNet,yNet=createNetInput(xTest,yTest)
         predictions,predictedClasses=predictFunc(xNet)
